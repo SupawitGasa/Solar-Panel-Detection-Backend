@@ -145,6 +145,17 @@ def generating_config_file():
                 print(f"Retrying Task ID: {tid}")
                 print(f"Retry Task Title: {title}")
 
+                # Check if the number of retrial has reached 5
+                retry_count_sql = """
+                    SELECT retry_count
+                    FROM Task_Step
+                    WHERE tid = %s AND step_name = 'generating_config';
+                """
+                cursor.execute(retry_count_sql, (tid,))
+                retry_num = cursor.fetchone()
+                if retry_num and retry_num['retry_count'] >= 5:
+                    continue
+
                 # Increment the number of retrial by 1
                 update_retry_sql = """
                     UPDATE Task_Step
