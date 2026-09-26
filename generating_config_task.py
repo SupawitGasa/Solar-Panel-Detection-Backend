@@ -110,6 +110,7 @@ def generating_config_file():
 
                     # Commit changes to the database
                     connection.commit()
+                    print(f"Task ID {tid} status updated to 'fetch_image:pending'.\n")
 
                 except Exception as task_err:
                     # If failed, throw away the draft
@@ -213,6 +214,7 @@ def generating_config_file():
 
                     # Commit changes to the database
                     connection.commit()
+                    print(f"Task ID {tid} status updated to 'fetch_image:pending'.\n")
                     
                 except Exception as task_err:
                     # If failed, throw away the draft
