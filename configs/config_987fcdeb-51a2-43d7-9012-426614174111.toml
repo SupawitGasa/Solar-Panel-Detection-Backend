@@ -1,8 +1,8 @@
 [inference]
-    inference_path = 'data/inference/987fcdeb-51a2-43d7-9012-426614174111/'
-    job_name = 'job_google_full'
+    inference_path = 'data/inference/'
+    job_name = 'Bang Kadi Solar Check'
 
-    input_folder = 'data/inference/987fcdeb-51a2-43d7-9012-426614174111/input'
+    input_folder = 'input'
     output_folder = 'output'
     tile_folder = 'input_tile'
     tile_size   = 512
