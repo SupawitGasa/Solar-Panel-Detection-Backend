@@ -18,12 +18,12 @@ from rasterio.transform import from_bounds
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',          # Replace with your MySQL username
-    'password': 'my password', # Replace with your MySQL password
+    'password': 'my password*', # Replace with your MySQL password
     'database': 'solar_panel_pipeline'
 }
 
 # Necessary parameters defined here:
-ZOOM = 19
+ZOOM = 20
 TILE_SIZE = 256
 TILE_URL_TEMPLATE = "https://mt{server}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
 REQUEST_DELAY_SEC = 0.3
@@ -136,6 +136,10 @@ def fetch_image():
                     """
                     cursor.execute(update_running_task, (tid,))
 
+                    # Verify the coordinates
+                    if min_lat >= max_lat or min_lng >= max_lng:
+                        raise ValueError(f"Invalid BBOX: lat {min_lat}-{max_lat}, lng {min_lng}-{max_lng}")
+
                     # Retrieve the input folder path
                     config_file_path = os.path.join(CONFIG_OUTPUT_DIR, f"config_{tid}.toml")
                     with open(config_file_path, "rb") as file:
@@ -146,7 +150,7 @@ def fetch_image():
                     # Fetch a GeoTIFF image
                     # A: Find which tile indices cover the desired region
                     x_min_f, y_min_f = lnglat_to_tile(min_lng, max_lat, ZOOM) # the top-left corner of the region
-                    x_max_f, y_max_f = lnglat_to_tile(max_lng, max_lat, ZOOM) # the bottom-right corner of the region
+                    x_max_f, y_max_f = lnglat_to_tile(max_lng, min_lat, ZOOM) # the bottom-right corner of the region
 
                     x_start, x_end = int(math.floor(x_min_f)), int(math.floor(x_max_f))
                     y_start, y_end = int(math.floor(y_min_f)), int(math.floor(y_max_f))
@@ -187,7 +191,7 @@ def fetch_image():
                     )
 
                     # Save a GeoTIFF image
-                    image_path = input_folder_path / "image.tif"
+                    image_path = input_folder_path / f"{title}.tif"
                     with rasterio.open(
                         image_path,
                         "w",
@@ -300,6 +304,10 @@ def fetch_image():
                     """
                     cursor.execute(update_running_task, (tid,))
 
+                    # Verify the coordinates
+                    if min_lat >= max_lat or min_lng >= max_lng:
+                        raise ValueError(f"Invalid BBOX: lat {min_lat}-{max_lat}, lng {min_lng}-{max_lng}")
+
                     # Retrieve the input folder path
                     config_file_path = os.path.join(CONFIG_OUTPUT_DIR, f"config_{tid}.toml")
                     with open(config_file_path, "rb") as file:
@@ -310,7 +318,7 @@ def fetch_image():
                     # Fetch a GeoTIFF image
                     # A: Find which tile indices cover the desired region
                     x_min_f, y_min_f = lnglat_to_tile(min_lng, max_lat, ZOOM) # the top-left corner of the region
-                    x_max_f, y_max_f = lnglat_to_tile(max_lng, max_lat, ZOOM) # the bottom-right corner of the region
+                    x_max_f, y_max_f = lnglat_to_tile(max_lng, min_lat, ZOOM) # the bottom-right corner of the region
 
                     x_start, x_end = int(math.floor(x_min_f)), int(math.floor(x_max_f))
                     y_start, y_end = int(math.floor(y_min_f)), int(math.floor(y_max_f))
@@ -351,7 +359,7 @@ def fetch_image():
                     )
 
                     # Save a GeoTIFF image
-                    image_path = input_folder_path / "image.tif"
+                    image_path = input_folder_path / f"{title}.tif"
                     with rasterio.open(
                         image_path,
                         "w",

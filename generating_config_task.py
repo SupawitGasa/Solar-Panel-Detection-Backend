@@ -6,7 +6,7 @@ from mysql.connector import Error
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',          # Replace with your MySQL username
-    'password': 'my password', # Replace with your MySQL password
+    'password': 'my password*', # Replace with your MySQL password
     'database': 'solar_panel_pipeline'
 }
 
@@ -79,7 +79,7 @@ def generating_config_file():
 
                     # Generating config file according to the template
                     customized_config = template_content.replace(
-                        "Inference_path = 'data/inference/'",
+                        "inference_path = 'data/inference/'",
                         f"inference_path = 'data/inference/{tid}/'"
                     ).replace(
                         "job_name = 'job_google_full'",
@@ -183,7 +183,7 @@ def generating_config_file():
 
                     # Generating config file according to the template
                     customized_config = template_content.replace(
-                        "Inference_path = 'data/inference/'",
+                        "inference_path = 'data/inference/'",
                         f"inference_path = 'data/inference/{tid}/'"
                     ).replace(
                         "job_name = 'job_google_full'",
