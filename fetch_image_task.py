@@ -158,6 +158,17 @@ def fetch_image():
                     n_cols = x_end - x_start + 1
                     n_rows = y_end - y_start + 1
 
+                    # Ensure that the image is not too large
+                    MAX_TILES = 400
+
+                    n_tiles = n_rows * n_cols
+
+                    if n_tiles > MAX_TILES:
+                        raise ValueError(
+                            f"Requested area is too large ({n_tiles} tiles, limit {MAX_TILES}). "
+                            f"Please select a smaller region."
+                        )
+
                     # B: Create an empty canvas to put tiles on
                     mosaic = Image.new("RGB", (n_cols * TILE_SIZE, n_rows * TILE_SIZE))
 
@@ -325,6 +336,17 @@ def fetch_image():
 
                     n_cols = x_end - x_start + 1
                     n_rows = y_end - y_start + 1
+
+                    # Ensure that the image is not too large
+                    MAX_TILES = 400
+
+                    n_tiles = n_rows * n_cols
+
+                    if n_tiles > MAX_TILES:
+                        raise ValueError(
+                            f"Requested area is too large ({n_tiles} tiles, limit {MAX_TILES}). "
+                            f"Please select a smaller region."
+                        )                    
 
                     # B: Create an empty canvas to put tiles on
                     mosaic = Image.new("RGB", (n_cols * TILE_SIZE, n_rows * TILE_SIZE))
