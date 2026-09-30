@@ -18,7 +18,7 @@ from rasterio.transform import from_bounds
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',          # Replace with your MySQL username
-    'password': 'my password*', # Replace with your MySQL password
+    'password': 'my password', # Replace with your MySQL password
     'database': 'solar_panel_pipeline'
 }
 
@@ -29,6 +29,11 @@ TILE_URL_TEMPLATE = "https://mt{server}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
 REQUEST_DELAY_SEC = 0.3
 REQUEST_TIMEOUT_SEC = 10
 CONFIG_OUTPUT_DIR = 'configs'
+
+# Resolution (meters per pixel on the ground) that the model was trained on (10 cm/pixel)
+TARGET_RES_M = 0.10
+# Size of one pixel in EPSG:3857 meters at this zoom level (at the equator)
+ZOOM_PIXEL_M = 40075016.686 / (TILE_SIZE * 2 ** ZOOM)
 
 # The function for converting latitude & longitude <--> tile (Standard formula of Slippy Map / Web Mercator)
 def lnglat_to_tile(lng, lat, zoom):
@@ -188,6 +193,19 @@ def fetch_image():
 
                     left_m, top_m = lnglat_to_webmercator(lng_left, lat_top)
                     right_m, bottom_m = lnglat_to_webmercator(lng_right, lat_bottom)
+
+                    # Resample the mosaic to match the model's training resolution (~10cm/pixel)
+                    # EPSG:3857 stretches distances by 1/cos(lat), so the real ground resolution
+                    # of a Google tile is ZOOM_PIXEL_M * cos(lat), not ZOOM_PIXEL_M itself
+                    mid_lat = (lat_top + lat_bottom) / 2
+                    ground_res_m = ZOOM_PIXEL_M * math.cos(math.radians(mid_lat)) # ~0.145 m at zoom 20, lat ~14 deg
+                    scale = ground_res_m / TARGET_RES_M # ~1.448 (>1 means upscale)
+
+                    new_size = (round(mosaic.width * scale), round(mosaic.height * scale))
+
+                    # Resize only once, with LANCZOS (sharp edges for panel borders); repeated resizing blurs the image
+                    # This does not add real detail, it only makes panel size in pixels closer to the training data
+                    mosaic = mosaic.resize(new_size, Image.LANCZOS)
 
                     # D: Write a mosaic image to a GeoTIFF image
                     # Create an input folder if not exists
@@ -367,6 +385,19 @@ def fetch_image():
 
                     left_m, top_m = lnglat_to_webmercator(lng_left, lat_top)
                     right_m, bottom_m = lnglat_to_webmercator(lng_right, lat_bottom)
+
+                    # Resample the mosaic to match the model's training resolution (~10cm/pixel)
+                    # EPSG:3857 stretches distances by 1/cos(lat), so the real ground resolution
+                    # of a Google tile is ZOOM_PIXEL_M * cos(lat), not ZOOM_PIXEL_M itself
+                    mid_lat = (lat_top + lat_bottom) / 2
+                    ground_res_m = ZOOM_PIXEL_M * math.cos(math.radians(mid_lat)) # ~0.145 m at zoom 20, lat ~14 deg
+                    scale = ground_res_m / TARGET_RES_M # ~1.448 (>1 means upscale)
+
+                    new_size = (round(mosaic.width * scale), round(mosaic.height * scale))
+
+                    # Resize only once, with LANCZOS (sharp edges for panel borders); repeated resizing blurs the image
+                    # This does not add real detail, it only makes panel size in pixels closer to the training data
+                    mosaic = mosaic.resize(new_size, Image.LANCZOS)
 
                     # D: Write a mosaic image to a GeoTIFF image
                     # Create an input folder if not exists
