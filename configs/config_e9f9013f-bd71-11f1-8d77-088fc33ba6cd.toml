@@ -1,5 +1,5 @@
 [inference]
-    inference_path = 'data/inference/7845534b-bd6f-11f1-8d77-088fc33ba6cd/'
+    inference_path = 'data/inference/e9f9013f-bd71-11f1-8d77-088fc33ba6cd/'
     job_name = 'Suan Rangsit Solar Check'
 
     input_folder = 'input'
